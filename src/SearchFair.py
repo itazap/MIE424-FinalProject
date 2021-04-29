@@ -11,43 +11,58 @@ import numpy as np
 
 class SearchFair(BaseEstimator):
     """SearchFair
+    
     Parameters
-    ----------
-    fairness_notions: string
-        The name of the fairness notion that the classifier should respect. 'DDP' or 'DEO' can be used.
-    fairness_regularizer: string
-        The name of the fairness relaxation that is used as a regularizer. It can be 'linear', or 'wu'. For 'wu', the 'wu_bound' can be chosen.
-    wu_bound: string
-        The name of the function that is used in the bounds of Wu et al. It can be 'hinge', 'logistic', 'squared', 'exponential'
-    reg_beta: float
-        Regularization parameter Beta for the l2 regularization.
-    kernel: string
-        The kind of kernel that is used. It can be 'linear', 'rbf' or 'poly'. For 'rbf' and 'poly', the parameter gamma can be used.
-    gamma: float
-        For kernel='rbf', gamma is the kernel width, for kernel='poly', gamma is the degree.
-    loss_name: string
-        The name of the loss used. Possible values: 'hinge', 'logistic', 'squared', 'exponential'
-    lambda_max: float
-        The value of lambda_max for the start of the binary search.
-    max_iter: int
-        The number of iterations of the solver chosen.
-    reason_points: float
-        The ratio of points used as reasonable points for the similarity-based approach of SearchFair.
-    stop_criterion: float
-        If SearchFair finds a classifier that is at least as fair as 'stop_criterion', than it stops the search.
-    max_search_iter: int
-        The number of iterations for the binary search.
-    solver: string
-        The solver that is used by cvxpy. It can be 'SCS' or 'ECOS'.
-    verbose: boolean
+
+        fairness_notions: string
+            The fairness scoring metric that will be used in the classifier, with options of DDP or DEO.
+            
+        fairness_regularizer: string
+            The fairness relaxation which will be used as a regularization, with options of 'linear', 'wu', or 'wu_bound'.
+            
+        wu_bound: string
+            The function to be used for the bounds defined by Wu, with options of 'hinge', 'logistic', 'squared', or 'exponential'.
+            
+        reg_beta: float
+            The parameter beta used for L2 regularization.
+            
+        kernel: string
+            The kernel to be used, with options of 'linear', 'rbf' or 'poly'.
+            
+        gamma: float
+            The gamma that can be used for kernel='rbf' or kernel='poly'. If 'rbf', then gamma is kernel width. If 'poly', then gamma is degree.
+            
+        loss_name: string
+            The name of the loss used, with options of 'hinge', 'logistic', 'squared', or 'exponential'.
+            
+        lambda_max: float
+            The maximum lambda value used initially at the beginning of the binary search.
+            
+        max_iter: int
+            The maximum number of iterations to be carried out by the solver.
+            
+        reason_points: float
+            SearchFair's similarity-based approach: the percentage of points that are used as reasonable points.
+            
+        stop_criterion: float
+            The stopping criteria for when the solver finds a classifier that is at least as fair as this value.
+            
+        max_search_iter: int
+            The maxmimum number of iterations carried out in the binary search.
+            
+        solver: string
+            The solver that is used by cvxpy, with options of 'SCS' or 'ECOS'.
+            
+        verbose: boolean
+    
+    
     Attributes
-    ----------
-    coef_: numpy array
-        An array containing the trained weights for each reasonable point.
-    reason_pts_index: numpy array
-        An array containing the indices of the reasonable points in the training data.
-    Notes
-    ----------
+
+        coef_: numpy array
+            The array that contains each reasonable point's the trained weights 
+            
+        reason_pts_index: numpy array
+        The array that contains each training reasonable point's indices.
     """
 
     def __init__(self, fairness_notion='DDP', fairness_regularizer='wu', wu_bound='hinge', reg_beta=0.001, kernel='linear', gamma=None, loss_name='hinge', lambda_max=1, max_iter=3000, reason_points=0.5, stop_criterion=0.01, max_search_iter=10, solver='SCS', verbose=False):
@@ -69,18 +84,25 @@ class SearchFair(BaseEstimator):
         self.kernel = kernel
 
     def fit(self, x_train, y_train, s_train=None):
-        """Fits SearchFair on the given training data.
+        """ To fit SearchFair on the training dataset
+        .
         Parameters
-        ----------
-        x_train: numpy array
-            The features of the training data with shape=(number_points,number_features).
-        y_train: numpy array
-            The class labels of the training data with shape=(number_points,).
-        s_train: numpy array
-            The binary sensitive attributes of the training data with shape=(number_points,).
+        
+            x_train: numpy array
+                The shape is (num_points, num_features).
+                The training data features.
+                
+            y_train: numpy array
+                The shape is (num_points, ).
+                The class labels of the training data.
+                
+            s_train: numpy array
+                The shape is (num_points, ).
+                The training data's binary sensitive attributes.
+        
         Returns
-        ----------
-        self: object
+        
+            self: object
         """
 
         self.x_train = x_train
@@ -94,8 +116,7 @@ class SearchFair(BaseEstimator):
         lbda_min, lbda_max = 0, self.lambda_max
 
         def learn(reg, bound='upper'):
-            # If bound is None, we have decided which one to use, and we are in the middle of the binary search
-
+           
             self.fairness_lambda = reg
             if bound is not None:
                 self._construct_problem(bound=bound)
@@ -109,8 +130,8 @@ class SearchFair(BaseEstimator):
             return fair_value, self.coef_.copy()
 
         criterion = False
-
-        bound = 'upper' # even though an upper bound is specified, since lambda_min is 0, it falls away
+        bound = 'upper'
+        
         if self.verbose: print("Testing lambda_min: %0.2f" % lbda_min)
         min_fair_measure, min_alpha = learn(lbda_min, bound=bound)
         if np.sign(min_fair_measure) < 0: bound = 'lower'
@@ -127,7 +148,9 @@ class SearchFair(BaseEstimator):
             print("Classifier is fair enough with lambda = {:.4f}".format(best_lbda))
         elif np.sign(min_fair_measure) == np.sign(max_fair_measure):
             print('Fairness value has the same sign for lambda_min and lambda_max.')
-            print('Either try a different fairness regularizer or change the values of lambda_min and lambda_max') # Possibly, there could be a few more tries by reducing lambda.
+            
+            #   Lambda could be reduced to try to get different results.
+            print('Either try a different fairness regularizer or change the values of lambda_min and lambda_max')
         else:
             search_iter = 0
             if self.verbose: print("Starting Binary Search...")
@@ -165,23 +188,27 @@ class SearchFair(BaseEstimator):
         return self
 
     def predict(self, x_test):
-        """Predict the label of test data.
+        """Predict label for data points in the test set.
+        
         Parameters
-        ----------
-        x_test: numpy array
-            The features of the test data with shape=(number_points,number_features).
+        
+            x_test: numpy.array
+                The shape is: (num_points, num_Features)
+                The test data features.
+                
         Returns
-        ----------
-        y_hat: numpy array
-            The predicted class labels with shape=(number_points,).
+        
+            y_hat: numpy.array
+                The shape is: (num_points, ).
+                Class labels that were predicted.
         """
         kernel_matr = self.kernel_function(x_test, self.x_train[self.reason_pts_index])
         y_hat = np.dot(self.coef_, np.transpose(kernel_matr))
         return np.sign(y_hat)
 
     def _preprocess(self):
-        """Setting the attributes loss_func, kernel_function, and weight_vector,
-        which depends on the fairness notion, and is used in fairness related objects.
+        """Setting of loss function, kernel function and weight vectors of the attributes. These depend on the notion of fairness used, and appears
+        in the objects related to fairness.
         """
         self.coef_ = None
         self.fairness_lambda = 0
@@ -233,7 +260,7 @@ class SearchFair(BaseEstimator):
         self.prob_prot_pos = self.nmb_prot_pos / self.nmb_pos
         self.prob_unprot_pos = 1 - self.prob_prot_pos
 
-        # Create weights that are necessary for the fairness constraint
+        #   Creation of the necessary weights for the fairness constraints.
         if self.fairness_notion == 'DDP':
             normalizer = self.nmb_pts
             self.weight_vector = np.array(
@@ -246,7 +273,7 @@ class SearchFair(BaseEstimator):
             self.weight_vector = 0.5 * (self.y_train.reshape(-1, 1) + 1) * self.weight_vector
             self.weight_vector = (1 / normalizer) * self.weight_vector
 
-        # Choose random reasonable points
+        #   Choose reasonable points at random
         if self.reason_points <= 1:
             self.reason_pts_index = list(range(int(self.nmb_pts * self.reason_points)))
         else:
@@ -254,18 +281,18 @@ class SearchFair(BaseEstimator):
         self.nmb_reason_pts = len(self.reason_pts_index)
 
     def _construct_problem(self, bound='upper'):
-        """ Construct the cvxpy minimization problem.
-        It depends on the fairness regularizer chosen.
+        """ Formulize the min problem for cvxpy, depending on the regularizer chosen for fairness.
         """
 
-        # Variable to optimize
+        #   Optimization variable.
         self.alpha_var = cp.Variable((len(self.reason_pts_index), 1))
-        # Parameter for Kernel Matrix
+        
+        #   Kernel matrix parameter.
         self.kernel_matrix = cp.Parameter(shape=(self.x_train.shape[0], len(self.reason_pts_index)))
         self.fair_reg_cparam = cp.Parameter(nonneg=True)
 
 
-        # Form SVM with L2 regularization
+        # L2 regularized SVM formulization
         if self.fairness_lambda == 0:
             self.loss = cp.sum(self.loss_func(cp.multiply(self.y_train.reshape(-1, 1), self.kernel_matrix @ self.alpha_var))) + self.reg_beta * self.nmb_pts * cp.square(
                 cp.norm(self.alpha_var, 2))
@@ -293,11 +320,10 @@ class SearchFair(BaseEstimator):
         self.prob = cp.Problem(cp.Minimize(self.loss))
 
     def _optimize(self):
-        """Conduct the optimization of the created problem by using ECOS or SCS
-        with cvxpy. 
+        """Optimize the formed problem using CVXPY's ECOS or SCS.
         """
 
-        # Compute and initialize kernel matrix
+        #   Initialize the kernel matrix
         self.K_sim = self.kernel_function(self.x_train, self.x_train[self.reason_pts_index])
         self.kernel_matrix.value = self.K_sim
         self.fair_reg_cparam.value = self.fairness_lambda
@@ -318,22 +344,30 @@ class SearchFair(BaseEstimator):
             print('value %s ' % self.prob.value)
         self.coef_ = self.alpha_var.value.squeeze()
     def compute_fairness_measures(self, y_predicted, y_true, sens_attr):
-        """Compute value of demographic parity and equality of opportunity for given predictions.
+        """Compute DP and EO values for predictions.
+        
         Parameters
-        ----------
-        y_predicted: numpy array
-            The predicted class labels of shape=(number_points,).
-        y_true: numpy array
-            The true class labels of shape=(number_points,).
-        sens_attr: numpy array
-            The sensitive labels of shape=(number_points,).
+        
+            y_predicted: numpy.array
+                The shape is: (num_points, ).
+                The predicted class labels.
+                
+            y_true: numpy.array
+                The shape is: (num_points, ).
+                The true class labels.
+                
+            sens_attr: numpy.array
+                The shape is: (number_points, ).
+                The sensitive labels.
+        
         Returns
-        ----------
-        DDP: float
-            The difference of demographic parity.
-        DEO: float
-            The difference of equality of opportunity.
+        
+            DDP: float
+                The demographic parity difference score.
+            DEO: float
+                The equality of opportunity difference score.
         """
+        
         positive_rate_prot = self.get_positive_rate(y_predicted[sens_attr==-1], y_true[sens_attr==-1])
         positive_rate_unprot = self.get_positive_rate(y_predicted[sens_attr==1], y_true[sens_attr==1])
         true_positive_rate_prot = self.get_true_positive_rate(y_predicted[sens_attr==-1], y_true[sens_attr==-1])
@@ -361,17 +395,22 @@ class SearchFair(BaseEstimator):
         return pr
 
     def get_true_positive_rate(self, y_predicted, y_true):
-        """Compute the true positive rate for given predictions of the class label.
+        """Using class labels' predictions, calculate the true positive rate
+        
         Parameters
-        ----------
-        y_predicted: numpy array
-            The predicted class labels of shape=(number_points,).
-        y_true: numpy array
-            The true class labels of shape=(number_points,).
+
+            y_predicted: numpy.array
+                The shape is (number_points, ).
+                The predicted class labels.
+                
+            y_true: numpy.array
+                The shape is (number_points, ).
+                The true class labels.
+                
         Returns
-        ---------
-        tpr: float
-            The true positive rate.
+  
+            tpr: float
+                The true positive rate.
         """
         tn, fp, fn, tp = confusion_matrix(y_true, y_predicted).ravel()
         tpr = tp / (tp+fn)
