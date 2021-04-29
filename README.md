@@ -14,7 +14,41 @@ Y. Wu, L. Zhang and X. Wu, "On Convexity and Bounds of Fairness-aware Classifica
 
 M. Lohaus and M. Perrot, "Too Relaxed to Be Fair", 2020. [Online]. Available: http://proceedings.mlr.press/v119/lohaus20a/lohaus20a.pdf. [Accessed: 29- Mar- 2021].
 
-# Novelty
+# Noteable code that has been reused
+
+Our project has used/adapted code from Michael Lohous’ SearchFair repository, found at: https://github.com/mlohaus/SearchFair.
+
+The citation for this SearchFair repository is:
+
+@inproceedings{lohaus2020,
+  title={Too Relaxed to Be Fair},
+  author={Lohaus, Michael and Perrot, Micha{\"e}l and von Luxburg, Ulrike},
+  booktitle={International Conference on Machine Learning},
+  year={2020}
+}
+
+# Setup and Run
+
+*We suggest using Google Colab for running the notebook files.
+
+Notebooks to run the various result tests are in the main project directory, along with the Adult Dataset exploration notebook.
+
+The source code for the different class and functions can be found in the 'src' folder, and must be uploaded to Google Colab using the same folder name and hierarchy. 
+
+The dataset installation command simply clones Michael Lohous’ Github repository within each of the necessary notebooks. Running this command will clone the entire repository into the Colab workspace and will provide the up-to-date data. 
+
+Next, the following reqiured packages must be installed and up-to-date:
+- numpy >= 1.18.1
+- cvxpy >= 1.1.0
+- scikit-learn >= 0.22.1
+- pandas >= 1.0.1
+- matplotlib >= 3.1.3
+- python_requires= >= 3.7
+
+Finally, the result notebooks can be uploaded and opened in Google Colab to run by either individually running each block, or by running the entire file at once. 
+
+ 
+# Project Description
 
 The problem of focus is classification under fairness constraints, based on the literature from Michael Lohaus, Michael Perrot, and Ulrike von Luxburg titled ‘Too Relaxed To Be Fair.’ The paper builds upon previous work to address the challenge of training a classifier that is not biased against a group of individuals using constrained optimization. The initial approach to the problem by Donini (2018) is initially formulated as a nonconvex, nonsmooth minimization problem. Due to the difficulty in optimizing these types of problems, Donini used a simple linear relaxation of constraints to transform into a convex optimization problem. Wu (2019) gained improvements in results by attempting to address a transformation to convexity using lower-upper relaxation and surrogate functions. Finally, Lohaus (2020) introduced a novel approach by reformulating a convex function through a proposed SearchFair algorithm yielding the best overall results. 
 
