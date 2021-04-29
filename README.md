@@ -39,7 +39,7 @@ The dataset installation command simply clones Michael Lohous’ Github reposito
 
 Next, the reqiured packages installed can be found in requirements.txt.
 
-Finally, the result notebooks can be ran by either individually running each block, or by running the entire file at once. 
+Finally, the result notebooks can be uploaded and opened in Google Colab to run by either individually running each block, or by running the entire file at once. 
 
  
 # Project Description
