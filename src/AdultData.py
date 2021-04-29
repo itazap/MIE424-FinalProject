@@ -6,50 +6,60 @@ import pandas as pd
 
 
 def build_adult_data(dataset,sens_attribute = 'sex',load_data_size=None):
-    """Build the Adult dataset.
-    Source: UCI Machine Learning Repository.
-    All Binary Mappings are defined in Lohaus' Too Relaxed To Be Fair research.
-    We have kept the exact same mapping to make for clean comparisons. 
+    """Building the Adult dataset [Machine Learning Repository] for future use.
+    Lohaus' Too Relaxed To Be Fair paper provides further explainations and definitions of each binary mapping.
+    The mappings have been kept identical in order to make comparing easier.
 
-    Parameters
-    ----------
-    load_data_size: int
-      The number of points to be loaded. If None, returns all data points unshuffled.
-      If other than None, returns load_data_size shuffled.
+    Parameters:
+    
+        load_data_size: int
+            Loaded number of points: if an existing value, it will return the shuffled load_data_size; otherwise, if none type, it will
+            return all the data points in an unshuffled manner.
 
-    Returns
-    ---------
-    X: numpy array
-      The feature input matrix after a binary mapping of attributes.
-      Shape=(number_data_points, number_features)
-    y: numpy array
-      The classification labels (matrix) after a binary mapping of attributes.
-      Shape=(number_data_points,).
-    s: numpy array
-      The sensitive feature vector after a binary mapping of attributes. 
-      Shape=(number_data_points,).
+    Returns:
+    
+        X: numpy.array
+            Shape is going to be: (num_data_points, num_features).
+            A matrix of the returned feature inputs upon being mapped with binary attributes
+
+        y: numpy.array
+            Shape is going to be: (num_data_points, ).
+            A matrix of the returned classifications labels upon being mapped with binary attributes
+
+        s: numpy.array
+            Shape is going to be: (num_data_points, ).
+            A vector of the returned sensitive features upon being mapped with binary attributes. 
     """
   
     def binary_mapping(tuple):
-        # 'age'- Binary Cut-off: 37
+        #   Cutting off the age feature (>37 and <=37) to be a binary attribute.
         tuple['age'] = 1 if tuple['age'] > 37 else 0
-        # 'workclass'- Binary Translation to Private/NonPrivate
+        
+        #   Transforming the workclass attribute to be binary attribute of Private / NonPrivate
         tuple['workclass'] = 'NonPrivate' if tuple['workclass'] != 'Private' else 'Private'
-        # 'education-num'- Binary Cut-off: 9
+        
+        #   Cutting off the education-num feature (>9 and <=9) to be a binary attribute.
         tuple['education-num'] = 1 if tuple['education-num'] > 9 else 0
-        # 'maritial-status'- Binary Translation to Married-civ-spouse/nonMarriedcivspouse
+        
+        #   Transforming the marital-status attribute to be binary attribute of MarriedCivSpouse / NonMarriedCivSpouse
         tuple['marital-status'] = "Marriedcivspouse" if tuple['marital-status'] == "Married-civ-spouse" else "nonMarriedcivspouse"
-        # 'occupation'- Binary Translation to Craft-repair/NonCraftrepair
+        
+        #   Transforming the occupation attribute to be binary attribute of CraftRepair / NonCraftRepair
         tuple['occupation'] = "Craftrepair" if tuple['occupation'] == "Craft-repair" else "NonCraftrepair"
-        # 'relationship'- Binary Translation to InFamily/Not-in-family
+        
+        #   Transforming the relationship attribute to be binary attribute of NotInFamily / InFamily
         tuple['relationship'] = "NotInFamily" if tuple['relationship'] == "Not-in-family" else "InFamily"
-        # 'race'- Binary Translation to White/NonWhite
+        
+        #   Transforming the race attribute to be binary attribute of White / NonWhite
         tuple['race'] = 'NonWhite' if tuple['race'] != "White" else "White"
-        # 'sex'- Binary Translation to Male/Female
+        
+        #   Transforming the sex attribute to be binary attribute of Male / Female
         tuple['sex'] = 'Female' if tuple['sex'] != "Male" else 'Male'
-        # 'hours-per-week'- Binary Cut-off: 40
+        
+        #   Cutting off the hours-per-week feature (>40 and <=40) to be a binary attribute.
         tuple['hours-per-week'] = 1 if tuple['hours-per-week'] > 40 else 0
-        # 'native-country'- Binary Translation to United-States/NonUS
+        
+        #   Transforming the native-country attribute to be binary attribute of US / NonUS
         tuple['native-country'] = "US" if tuple['native-country'] == "United-States" else "NonUS"
 
         return tuple
@@ -57,7 +67,7 @@ def build_adult_data(dataset,sens_attribute = 'sex',load_data_size=None):
     df = dataset
     df = df.apply(binary_mapping, axis=1)
 
-    # Convert Binary Mapping of Sensitive Attribute to {1,-1}
+    #   Conversion of the sensitive attributes' binary mapping to 1 or -1
     if sens_attribute == 'sex':
         sensitive_attr_map = {'Male': 1, 'Female': -1}
         x_vars = ['age','workclass','education-num','marital-status','occupation','relationship','race','hours-per-week','native-country']
@@ -67,22 +77,22 @@ def build_adult_data(dataset,sens_attribute = 'sex',load_data_size=None):
   
     s = df[sens_attribute].map(sensitive_attr_map).astype(int)
 
-    # Convert Binary Mapping of Label Attribute to {1,-1}
+    #   Conversion of the label attributes' binary mapping to 1 or -1
     label_map = {'>50K': 1, '<=50K': -1}
     y = df['income'].map(label_map).astype(int)
 
-    # Build Input Matrix (Feature Set) as a proper DataFrame
+    #   Building a dataframe object for the input matrix (which is the feature set).
     x = pd.DataFrame(data=None)
     for x_var in x_vars:
         x = pd.concat([x, pd.get_dummies(df[x_var],prefix=x_var, drop_first=False)], axis=1)
 
-    # Return as numpy objects: Matrix/Vectors
+    #   Setting to matrices and vectors to be returned as numpy objects.
     X = x.to_numpy()
     s = s.to_numpy()
     y = y.to_numpy()
 
+    #   If: data_size is specified, then: shuffle the data
     if load_data_size is not None:
-    # Shuffle the data only if data_size is specified (Random detail from Paper code)
         perm = list(range(0, len(y)))
         shuffle(perm)
         X = X[perm][:load_data_size]
@@ -94,7 +104,7 @@ def build_adult_data(dataset,sens_attribute = 'sex',load_data_size=None):
     return X, y, s
 
 def normalize(x):
-    # scale to [-1, 1]
+    # Normalization to transform between 1 and -1.
     x_ = (x - x.min()) / (x.max() - x.min()) * 2 - 1
     return x_
 
