@@ -14,6 +14,19 @@ Y. Wu, L. Zhang and X. Wu, "On Convexity and Bounds of Fairness-aware Classifica
 
 M. Lohaus and M. Perrot, "Too Relaxed to Be Fair", 2020. [Online]. Available: http://proceedings.mlr.press/v119/lohaus20a/lohaus20a.pdf. [Accessed: 29- Mar- 2021].
 
+# Noteable Code that has been Reused
+
+Our project has used/adapted code from Michael Lohous’ SearchFair repository, found at: https://github.com/mlohaus/SearchFair.
+
+The citation for this SearchFair repository is:
+
+@inproceedings{lohaus2020,
+  title={Too Relaxed to Be Fair},
+  author={Lohaus, Michael and Perrot, Micha{\"e}l and von Luxburg, Ulrike},
+  booktitle={International Conference on Machine Learning},
+  year={2020}
+}
+
 # Setup and Run
 
 *We suggest using Google Colab for running the notebook files.
