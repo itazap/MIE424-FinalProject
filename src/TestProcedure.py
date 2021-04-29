@@ -17,13 +17,13 @@ class TestProcedure():
     def BuildDataset(self,sens_attribute,dataset,train_size = 1200):
         self.sens_attribute = sens_attribute
 
-        # Build the Adult Dataset
+        # Adult Dataset creation and building into x,y,s
         x_data, y_data, s_data = build_adult_data(dataset=dataset,sens_attribute=sens_attribute,load_data_size=None)
         
-        # Train Test split size.
+        # Split size of training and testing data
         train_size = 1200
         
-        # Split data into train and test.
+        # Split data
         x_train, x_test, y_train, y_test, s_train, s_test = train_test_split(x_data, y_data, s_data, train_size=train_size, shuffle=True)
         
         self.X_train = x_train
