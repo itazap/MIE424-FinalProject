@@ -19,11 +19,10 @@ M. Lohaus and M. Perrot, "Too Relaxed to Be Fair", 2020. [Online]. Available: ht
 *We suggest using Google Colab for running the notebook files.
 
 Notebooks to run the various result tests are in the main project directory, along with the Adult Dataset exploration notebook.
+
 The source code for the different class and functions can be found in the 'src' folder, and must be uploaded to Google Colab using the same folder name and hierarchy. 
+
 The dataset installation command simply clones Michael Lohous’ Github repository within each of the necessary notebooks. Running this command will clone the entire repository into the Colab workspace and will provide the up-to-date data. 
-The command is as follows:
-!git clone https://github.com/mlohaus/SearchFair.git
-%cd SearchFair
 
 Next, the reqiured packages installed can be found in requirements.txt.
 
