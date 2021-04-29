@@ -37,7 +37,13 @@ The source code for the different class and functions can be found in the 'src' 
 
 The dataset installation command simply clones Michael Lohous’ Github repository within each of the necessary notebooks. Running this command will clone the entire repository into the Colab workspace and will provide the up-to-date data. 
 
-Next, the reqiured packages installed can be found in requirements.txt.
+Next, the following reqiured packages must be installed and up-to-date:
+- numpy >= 1.18.1
+- cvxpy >= 1.1.0
+- scikit-learn >= 0.22.1
+- pandas >= 1.0.1
+- matplotlib >= 3.1.3
+- python_requires= >= 3.7
 
 Finally, the result notebooks can be uploaded and opened in Google Colab to run by either individually running each block, or by running the entire file at once. 
 
